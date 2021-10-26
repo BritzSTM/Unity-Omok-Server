@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "Unity-Omok-Server", "Unity-Omok-Server.njsproj", "{B164B408-1445-4202-A7CD-1D6F87142444}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B164B408-1445-4202-A7CD-1D6F87142444}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B164B408-1445-4202-A7CD-1D6F87142444}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B164B408-1445-4202-A7CD-1D6F87142444}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B164B408-1445-4202-A7CD-1D6F87142444}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C6B2B298-D689-4C94-8E03-3D5F541D5BF0}
+	EndGlobalSection
+EndGlobal
