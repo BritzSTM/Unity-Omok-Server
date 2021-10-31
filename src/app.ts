@@ -21,8 +21,11 @@ io.on("connection", (socket: Socket) => {
         console.log('A Player disconnected');
     });
 
-    socket.on("Chat", function (data: string) {
-        console.log("recived chat " + data);
+    socket.on("Chat", function (data: any) {
+        let obj = data;
+
+        console.log("recived chat " + obj.Data);
+        io.sockets.emit("ChatTo", obj.Data);
     });
 
     socket.emit("JoinedChannel", { Name: "default channel", Users: [] });
