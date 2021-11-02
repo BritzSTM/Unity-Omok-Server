@@ -4,42 +4,70 @@
 // https://blog.irowell.io/blog/use-a-message-buffer-stack-to-handle-data/
 // https://stackoverflow.com/questions/6805432/how-to-uniquely-identify-a-socket-with-node-js
 
-import { v4 as uuidv4 } from 'uuid';
-import { createServer, Server, Socket } from 'net';
-import { UserContext } from './type';
-
+import { createServer } from "http";
+import { Socket } from "net";
+import { deflate } from "zlib";
 var Struct = require('struct');
+
 const ServerConfig: any = {
     PublishAddress: '127.0.0.1',
     Port: 7001
-}
+};
 
-let nextSocketId: number = 0;
-let clientSocks = new Map<number, UserContext>();
-let PacketData = Struct()
-    .word32Sle('Length')
-    .word32Sle('Type');
+const io = require('socket.io')(ServerConfig.Port);
+interface PlayerSession{
+    Sock: Socket;
+    NickName: string;
+    Id: number;
+};
 
-const serverInst: Server = createServer((clientSock: Socket) => {
-    console.log('connect client : ' + clientSock.remoteAddress);
-    console.log('id : ' + nextSocketId + ' uuid : ' + uuidv4());
+let defualtPlayers: Array<PlayerSession> = [];
+let simpleNextId: number = 0;
 
-    const socketId = nextSocketId++;
-    clientSocks.set(socketId, { Sock: clientSock, NickName: "" });
+io.on("connection", (socket: Socket) => {
+    console.log('Player Connected');
+    const playerID: number = simpleNextId++;
+    let NickName: string;
 
-    var buf = PacketData.allocate();
+    socket.on("Chat", function (data: any) {
+        let obj = data;
+        console.log("recived chat " + obj.Data);
+        obj.NickName = NickName;
 
-    clientSock.on('data', (data) => {
-        console.log('recive data : ' + data.toString());
-        buf.set(data);
-        var proxy = buf.fields;
+        defualtPlayers.forEach((value: PlayerSession) => {
+            if (playerID != value.Id)
+                value.Sock.emit("ChatTo", obj);
+        });
+    });
 
-        console.log('buffer : ' + buf.buffer());
-        console.log("Length : " + proxy.Length + " Type : " + proxy.Type);
+    socket.on("JoinChannel", function (nickName: string) {
+        console.log("Joined Nick : " + nickName);
+        NickName = nickName;
+        defualtPlayers.push({ Sock: socket, NickName: nickName, Id: playerID });
+
+        let nickNames: string[] = [];
+        defualtPlayers.forEach((value: PlayerSession) => {
+            nickNames.push(value.NickName);
+        });
+
+        socket.emit("JoinedChannel", { Name: "default channel", Users: nickNames });
+        defualtPlayers.forEach((value: PlayerSession) => {
+            if (playerID != value.Id)
+                value.Sock.emit("JoinedNewPlayer", nickName);
+        });
+    });
+
+    socket.on('LeaveChannel', function () {
+        console.log('Player leave channel : ' + playerID);
+        defualtPlayers = defualtPlayers.filter((value: PlayerSession) => {
+            return value.Id == playerID;
+        });
+    });
+
+    socket.on('disconnect', function () {
+        console.log('Player disconnected : ' + playerID);
     });
 });
 
-serverInst.listen(ServerConfig.Port, ServerConfig.PublishAddress, () => {
-    console.log('Publish address : ' + ServerConfig.PublishAddress +
-        ' listen port : ' + ServerConfig.Port);
-});
+console.log('Publish address : ' + ServerConfig.PublishAddress +
+' listen port : ' + ServerConfig.Port);
